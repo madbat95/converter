@@ -13,12 +13,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatInputModule } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 
 const material = [
   MatSlideToggleModule,
   MatProgressSpinnerModule,
   MatCardModule,
+  MatButtonModule,
   MatListModule,
   MatFormFieldModule,
   MatSelectModule,
@@ -27,7 +29,14 @@ const material = [
 ];
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, material, NgbModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    material,
+    NgbModule,
+  ],
   providers: [provideAnimationsAsync()],
   bootstrap: [AppComponent],
 })

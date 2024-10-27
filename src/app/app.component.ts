@@ -20,24 +20,64 @@ export class AppComponent {
     { rate: 1.83, name: 'JPY' },
     { rate: 300, name: 'EUR' },
   ];
-  constructor() {}
+  constructor(private fb: FormBuilder) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.currencyForm = this.fb.group({
+      rate: [278],
+      fromAmount: [0],
+      toAmount: [0],
+    });
+
+    const savedData = localStorage.getItem('currencyData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      this.currencyForm.patchValue(parsedData);
+      console.log(parsedData);
+
+      const selectedCountry = this.countries.find(
+        (country) => country.rate === parsedData.rate
+      );
+      if (selectedCountry) {
+        this.selectedCountry = selectedCountry.name;
+      }
+    }
+
+    this.currencyForm.get('rate')!.valueChanges.subscribe((rate) => {
+      const selected = this.countries.find((country) => country.rate === rate);
+      if (selected) {
+        this.selectedCountry = selected.name;
+      }
+      this.convertToPKR();
+    });
+
+    this.currencyForm.get('fromAmount')!.valueChanges.subscribe(() => {
+      this.convertToUSD();
+    });
+
+    this.currencyForm.get('toAmount')!.valueChanges.subscribe(() => {
+      this.convertToPKR();
+    });
+  }
 
   convertToPKR(): void {
-    this.fromAmount = this.toAmount * this.rate;
+    const toAmount = this.currencyForm.get('toAmount')!.value;
+    const rate = this.currencyForm.get('rate')!.value;
+    this.currencyForm
+      .get('fromAmount')!
+      .setValue(toAmount * rate, { emitEvent: false });
   }
 
-  convertTOUSD(): void {
-    this.toAmount = this.fromAmount / this.rate;
+  convertToUSD(): void {
+    const fromAmount = this.currencyForm.get('fromAmount')!.value;
+    const rate = this.currencyForm.get('rate')!.value;
+    this.currencyForm
+      .get('toAmount')!
+      .setValue(fromAmount / rate, { emitEvent: false });
   }
-  onRateChange(event: any): void {
-    const selected = this.countries.find(
-      (country) => country.rate === event.value
-    );
-    if (selected) {
-      this.selectedCountry = selected.name;
-      this.convertTOUSD();
-    }
+  submit(): void {
+    const formData = this.currencyForm.value;
+    localStorage.setItem('currencyData', JSON.stringify(formData));
+    alert('Data saved to local storage!');
   }
 }

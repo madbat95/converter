@@ -1,0 +1,64 @@
+<!-- <mat-card class="converter-card">
+  <mat-card-content>
+    <form (ngSubmit)="convert()">
+      <mat-form-field appearance="fill">
+        <mat-label>From Currency</mat-label>
+        <mat-select [(ngModel)]="fromCurrency" name="fromCurrency" required>
+          <mat-option *ngFor="let currency of currencies" [value]="currency">
+            {{ currency }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Amount</mat-label>
+        <input
+          matInput
+          type="number"
+          [(ngModel)]="amount"
+          name="amount"
+          required
+          min="1"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>To Currency</mat-label>
+        <mat-select [(ngModel)]="toCurrency" name="toCurrency" required>
+          <mat-option *ngFor="let currency of currencies" [value]="currency">
+            {{ currency }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="isLoading"
+      >
+        Convert
+      </button>
+    </form>
+
+    <div *ngIf="isLoading" class="loader">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+
+    <div *ngIf="result !== null">
+      <h3>Converted Amount: {{ result | currency : toCurrency }}</h3>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card>
+  <mat-card-content>
+    <h3>Conversion History</h3>
+    <mat-list>
+      <mat-list-item *ngFor="let record of conversionHistory">
+        {{ record.date }}: {{ record.amount }} {{ record.from }} to
+        {{ record.to }} = {{ record.result }}
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+</mat-card> -->

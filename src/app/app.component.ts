@@ -12,72 +12,115 @@ export class AppComponent {
   toAmount: number = 0;
   currencyForm!: FormGroup;
   convertedAmount!: number;
-  rate: number = 278;
-  selectedCountry: string = 'USA';
-  countries: { rate: number; name: string }[] = [
-    { rate: 278, name: 'USA' },
-    { rate: 360.26, name: 'GBP' },
-    { rate: 1.83, name: 'JPY' },
-    { rate: 300, name: 'EUR' },
+  fromRate: number = 278;
+  toRate: number = 278;
+  fromCountry: string = 'US Dollar';
+  fromCountryCode: string = 'USD';
+  toCountry: string = 'US Dollar';
+  toCountryCode: string = 'USD';
+
+  countries = [
+    { rate: 1 / 278, name: 'US Dollar', code: 'USD' },
+    { rate: 1 / 360.26, name: 'British Pound', code: 'GBP' },
+    { rate: 1 / 1.83, name: 'Japanese Yen', code: 'JPY' },
+    { rate: 1 / 300, name: 'Euro', code: 'EUR' },
+    { rate: 1, name: 'Pakistani Rupee', code: 'PKR' },
   ];
+
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.currencyForm = this.fb.group({
-      rate: [278],
-      fromAmount: [0],
-      toAmount: [0],
+      fromRate: [this.countries[0].rate],
+      toRate: [this.countries[0].rate],
+      fromAmount: [1],
+      toAmount: [1],
+    });
+
+    this.currencyForm.get('fromRate')?.valueChanges.subscribe(() => {
+      this.convertFromAmount();
+      this.updateCountryNames();
+    });
+
+    this.currencyForm.get('toRate')?.valueChanges.subscribe(() => {
+      this.convertToAmount();
+      this.updateCountryNames();
+    });
+
+    this.currencyForm.get('fromAmount')?.valueChanges.subscribe(() => {
+      this.convertFromAmount();
+    });
+
+    this.currencyForm.get('toAmount')?.valueChanges.subscribe(() => {
+      this.convertToAmount();
     });
 
     const savedData = localStorage.getItem('currencyData');
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       this.currencyForm.patchValue(parsedData);
-      console.log(parsedData);
 
-      const selectedCountry = this.countries.find(
-        (country) => country.rate === parsedData.rate
+      const fromCountry = this.countries.find(
+        (country) => country.rate === parsedData.fromRate
       );
-      if (selectedCountry) {
-        this.selectedCountry = selectedCountry.name;
+      const toCountry = this.countries.find(
+        (country) => country.rate === parsedData.toRate
+      );
+
+      if (fromCountry) {
+        this.fromCountry = fromCountry.name;
+        this.fromCountryCode = fromCountry.code;
+      }
+      if (toCountry) {
+        this.toCountry = toCountry.name;
+        this.toCountryCode = toCountry.code;
       }
     }
-
-    this.currencyForm.get('rate')!.valueChanges.subscribe((rate) => {
-      const selected = this.countries.find((country) => country.rate === rate);
-      if (selected) {
-        this.selectedCountry = selected.name;
-      }
-      this.convertToPKR();
-    });
-
-    this.currencyForm.get('fromAmount')!.valueChanges.subscribe(() => {
-      this.convertToUSD();
-    });
-
-    this.currencyForm.get('toAmount')!.valueChanges.subscribe(() => {
-      this.convertToPKR();
-    });
   }
 
-  convertToPKR(): void {
-    const toAmount = this.currencyForm.get('toAmount')!.value;
-    const rate = this.currencyForm.get('rate')!.value;
-    this.currencyForm
-      .get('fromAmount')!
-      .setValue(toAmount * rate, { emitEvent: false });
-  }
-
-  convertToUSD(): void {
+  convertFromAmount(): void {
     const fromAmount = this.currencyForm.get('fromAmount')!.value;
-    const rate = this.currencyForm.get('rate')!.value;
+    const fromRate = this.currencyForm.get('fromRate')!.value;
+    const toRate = this.currencyForm.get('toRate')!.value;
+
+    const toAmount = (fromAmount * toRate) / fromRate;
     this.currencyForm
       .get('toAmount')!
-      .setValue(fromAmount / rate, { emitEvent: false });
+      .setValue(toAmount.toFixed(4), { emitEvent: false });
   }
+
+  convertToAmount(): void {
+    const toAmount = this.currencyForm.get('toAmount')!.value;
+    const fromRate = this.currencyForm.get('fromRate')!.value;
+    const toRate = this.currencyForm.get('toRate')!.value;
+
+    const fromAmount = (toAmount * fromRate) / toRate;
+    this.currencyForm
+      .get('fromAmount')!
+      .setValue(fromAmount.toFixed(4), { emitEvent: false });
+  }
+
+  updateCountryNames(): void {
+    const fromRateValue = this.currencyForm.get('fromRate')!.value;
+    const toRateValue = this.currencyForm.get('toRate')!.value;
+
+    const fromCountry = this.countries.find(
+      (country) => country.rate === fromRateValue
+    );
+    const toCountry = this.countries.find(
+      (country) => country.rate === toRateValue
+    );
+
+    this.fromCountry = fromCountry ? fromCountry.name : '-';
+    this.fromCountryCode = fromCountry ? fromCountry.code : '-';
+    this.toCountry = toCountry ? toCountry.name : '-';
+    this.toCountryCode = toCountry ? toCountry.code : '-';
+  }
+
   submit(): void {
-    const formData = this.currencyForm.value;
-    localStorage.setItem('currencyData', JSON.stringify(formData));
-    alert('Data saved to local storage!');
+    localStorage.setItem(
+      'currencyData',
+      JSON.stringify(this.currencyForm.value)
+    );
   }
 }
